@@ -1,0 +1,13 @@
+.DS_Store
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+.Renviron
+.Rapp.history
+.Rcheck/
+*.tar.gz
+src/*.o
+src/*.so
+src/*.dll
+inst/doc/

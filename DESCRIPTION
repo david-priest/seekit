@@ -1,0 +1,58 @@
+Package: seekit
+Type: Package
+Title: Single-Cell Plotting and Analysis Helpers for CyTOF and scRNA-seq
+Version: 0.0.0.9000
+Authors@R: person("David", "Priest", email = "davidpriest898@gmail.com", role = c("aut", "cre"))
+Description: Plotting, save, and SingleCellExperiment/Seurat-handling helpers
+    for high-dimensional single-cell analysis -- mass cytometry (CyTOF) and
+    single-cell RNA-seq (CITE-seq / scRNA-seq). Functions historically vendored
+    as per-project `R/<name>.R` copies; this package consolidates them into a
+    single canonical source. Install per-project via renv to preserve
+    reproducibility.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Depends:
+    R (>= 4.0.0)
+Imports:
+    ggplot2,
+    ggrastr,
+    ggbeeswarm,
+    ggh4x,
+    ggnewscale,
+    rlang,
+    dplyr,
+    tidyr,
+    scales,
+    stringr,
+    grid,
+    grDevices,
+    here,
+    digest,
+    ggridges,
+    scattermore,
+    reshape2,
+    circlize,
+    RColorBrewer,
+    magrittr,
+    matrixStats,
+    SingleCellExperiment,
+    S4Vectors,
+    SummarizedExperiment,
+    ComplexHeatmap,
+    rstatix,
+    ggpubr,
+    purrr
+Suggests:
+    patchwork,
+    svglite,
+    shiny,
+    rstudioapi,
+    Seurat,
+    SeuratObject,
+    knitr,
+    testthat (>= 3.0.0)
+URL: https://github.com/david-priest/seekit
+BugReports: https://github.com/david-priest/seekit/issues

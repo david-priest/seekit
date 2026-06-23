@@ -1,0 +1,11 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^tools$
+^README\.md$
+^LICENSE\.md$
+^.*\.tar\.gz$
+^\.Rcheck$
+^dev$
+^PUBLISHING\.md$
+^WORKFLOW_HANDOFF\..*$

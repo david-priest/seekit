@@ -1,0 +1,33 @@
+# Generated catch-all: exports every top-level object whose name doesn't start
+# with a dot. Replace with roxygen-generated NAMESPACE (via `devtools::document()`)
+# once @export tags are added per-function. Until then this keeps every helper
+# accessible after `library(seekit)`.
+exportPattern("^[^.]")
+
+# Imports. The de-CATALYST plotters used to borrow CATALYST's namespace (the
+# `environment(...) <- asNamespace('CATALYST')` hack) to resolve bare calls like
+# gpar()/rowAnnotation()/geom_density_ridges(). With CATALYST removed, winglab
+# imports these itself so bare external calls resolve in the package namespace.
+import(ggplot2)
+import(grid)
+import(ComplexHeatmap)
+import(ggridges)
+import(scattermore)
+import(reshape2)
+import(circlize)
+import(RColorBrewer)
+import(magrittr)
+import(SingleCellExperiment)
+import(SummarizedExperiment)
+import(S4Vectors)
+import(matrixStats)
+import(rstatix)
+import(ggpubr)
+import(dplyr)
+import(tidyr)
+import(scales)
+import(ggh4x)
+import(ggnewscale)
+import(rlang)
+import(ggbeeswarm)
+import(purrr)
