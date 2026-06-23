@@ -16,10 +16,10 @@ f2 <- function(p, w = 20, h = 20, title = "your_title",
     stop("png_res must be a positive integer (DPI). Got: ", png_res)
   }
 
-  # Get the name of the current RMD file
-  library(rmdhelp)
-  rmd_file_path <- get_this_rmd_file()
-  rmd_file_name <- basename(rmd_file_path)
+  # Name of the source qmd/Rmd, resolved without a hard rmdhelp dependency
+  # (rmdhelp is GitHub-only and optional). Falls back to "figures" if unknown.
+  rmd_file_path <- .wl_source_file()
+  rmd_file_name <- if (is.na(rmd_file_path)) "figures" else basename(rmd_file_path)
   rmd_file_name_noext <- tools::file_path_sans_ext(rmd_file_name)
 
   # Anchor the dated output folder to the project root (the directory
@@ -124,7 +124,9 @@ f2 <- function(p, w = 20, h = 20, title = "your_title",
   # style columns) which is what plotAbundancesDiffStrip's stats strip carries.
   # This way you get the data table AND the stats table in one xlsx, even when
   # the figure is `strip / data` glued together with patchwork.
-  if (saveExcel) {
+  if (saveExcel && !requireNamespace("openxlsx", quietly = TRUE)) {
+    warning("openxlsx is not installed; skipping Excel data save. install.packages('openxlsx').")
+  } else if (saveExcel) {
     library(openxlsx)
     excel_filename <- file.path(folder_name, paste0(timestamp, "_", title, "_data.xlsx"))
     cat("Saving Excel...\n")
@@ -288,8 +290,10 @@ f2 <- function(p, w = 20, h = 20, title = "your_title",
 
   # If no RMD or sessionInfo file saved in the last 5 minutes, save a copy
   if (is.na(latest_file_time) || difftime(current_time, latest_file_time, units = "mins") > 20) {
-    rmd_filename <- file.path(folder_name, paste0(timestamp, "_", rmd_file_name))
-    file.copy(from = rmd_file_path, to = rmd_filename)
+    if (!is.na(rmd_file_path) && file.exists(rmd_file_path)) {
+      rmd_filename <- file.path(folder_name, paste0(timestamp, "_", rmd_file_name))
+      file.copy(from = rmd_file_path, to = rmd_filename)
+    }
 
     # Save the output of sessionInfo() as a text file
     sessioninfo_filename <- file.path(folder_name, paste0(timestamp, "_sessioninfo.txt"))

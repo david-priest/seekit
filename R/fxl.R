@@ -6,10 +6,13 @@
 
 fxl <- function(df_list, title = "your_data", separate_sheets = TRUE) {
   
-  library(rmdhelp)
+  if (!requireNamespace("openxlsx", quietly = TRUE))
+    stop("fxl() needs openxlsx for Excel output. install.packages('openxlsx').")
   library(openxlsx)
-  rmd_file_path <- get_this_rmd_file()
-  rmd_file_name <- basename(rmd_file_path)
+
+  # Source qmd/Rmd name without a hard rmdhelp dependency (rmdhelp is optional).
+  rmd_file_path <- .wl_source_file()
+  rmd_file_name <- if (is.na(rmd_file_path)) "figures" else basename(rmd_file_path)
   rmd_file_name_noext <- tools::file_path_sans_ext(rmd_file_name)
 
   # Anchor folder to here::here() (project root) rather than getwd().
