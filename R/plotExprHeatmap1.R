@@ -155,7 +155,17 @@ plotExprHeatmap1 <- function (x, features = NULL, by = c("sample_id", "cluster_i
     row_labels_after_clustering <- rownames(z)[row_order(ht)]
     row_labels_df <- data.frame(row_labels = row_labels_after_clustering)
 
-    # Return both the heatmap object and the dataframe containing row labels
-    list(heatmap = p, row_labels_df = row_labels_df)
+    # Attach the per-cluster matrix BEHIND the heatmap (the exact values shown) as
+    # `source_data`, oriented markers x clusters, so `f2(..., saveExcel = TRUE)` writes
+    # it to the dated `_data.xlsx` (with a MANIFEST entry) — lets cluster identities be
+    # read off numbers instead of eyeballing the figure.
+    out <- list(heatmap = p, row_labels_df = row_labels_df)
+    sd <- tryCatch(
+        data.frame(marker = colnames(z), round(t(z), 3), check.names = FALSE, row.names = NULL),
+        error = function(e) NULL)
+    if (!is.null(sd)) attr(out, "source_data") <- sd
+
+    # Return the heatmap object, the row-label order, and (via attr) the matrix
+    out
 }
 

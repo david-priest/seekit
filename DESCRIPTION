@@ -13,7 +13,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Depends:
     R (>= 4.0.0)
 Imports:
@@ -44,7 +44,9 @@ Imports:
     ComplexHeatmap,
     rstatix,
     ggpubr,
-    purrr
+    purrr,
+    nnls,
+    pbapply
 Suggests:
     patchwork,
     svglite,
@@ -53,8 +55,6 @@ Suggests:
     Seurat,
     SeuratObject,
     knitr,
-    openxlsx,
-    ragg,
     testthat (>= 3.0.0)
 URL: https://github.com/david-priest/seekit
 BugReports: https://github.com/david-priest/seekit/issues

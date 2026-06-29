@@ -1,0 +1,130 @@
+# plotAbundancesA1stats.R — CATALYST-free rewrite promoted from dev/catalyst_quarantine/.
+# Body verbatim from the project-vendored copy; only the CATALYST namespace
+# shims (CATALYST:::.* internals, bare accessors, the asNamespace('CATALYST')
+# hack) were rewritten to the package's .wl_* internals (R/wl_internals.R).
+# 2026-06 seekit migration of the CMV CyTOF pipeline.
+# plotAbundancesA1stats
+# 
+# A1-variant with statistics overlay (lines 1149-1275 of source .Rmd).
+# Migrated from CMV CyTOF Figures David.Rmd as part of repository reorganisation
+# (see CMV_paper_analysis.Rmd / CMV_extra_analyses.Rmd / CMV_code_quarantine.Rmd).
+
+plotAbundancesA1stats <- function (x, 
+                              k = "meta20", 
+                              log = F, 
+                              x_val = "day2", 
+                              fill_by = NULL,
+                              shape_by = NULL, 
+                              title = " ",             
+                              panel_spacing = 4,
+                              miny = 0.01,
+                              meta = c("sample_id","patient_id","condition"),
+                              my_palette = NULL,
+                              maxy = 100,
+                              col_clust = TRUE,
+                              k_pal = .wl_cluster_cols,
+                              point_size = 1, 
+                              lwidth = 0.4,
+                              by = c("sample_id", "cluster_id"),
+                              n_cols = 4, 
+                              xaxis = "free_y", 
+                              facet_ratio = 0.6,
+                              excluded_clusters = NULL,
+                              excluded_donors = NULL,
+                              merging_col = NULL,
+                              textsize = 12,
+                              show_stats = TRUE,   # Added to toggle stats
+                              stat_size = 4,       # Stat size for p-values
+                              step_increase = 0.05)  # Step increase for bracket positions
+{
+  
+  # Use the merging column from colData if provided
+  if (!is.null(merging_col)) {
+    cluster_ids <- x[[k]]
+  } else {
+    k <- .wl_check_k(x, k)
+    cluster_ids <- .wl_cluster_ids(x, k)
+  }
+  
+  ns <- table(cluster_id = cluster_ids, sample_id = .wl_sample_ids(x))
+  fq <- prop.table(ns, 2) * 100
+  df <- as.data.frame(fq)
+  m <- match(df$sample_id, x$sample_id)
+  for (i in meta) df[[i]] <- x[[i]][m]
+  
+  dfout1 <<- df
+  
+  # Decide whether to plot on a log scale
+  if (log == TRUE) {
+    df$Freq <- df$Freq + 0.01
+    ylabs <- "Proportion [%] (Log10 scale with 0.01 added to zero values)"
+  }
+  else {
+    ylabs <- "Proportion [%]"
+  }
+  
+  # Base ggplot object
+  p <- ggplot(na.omit(df), aes_string(x = x_val, y = "Freq")) + 
+    labs(x = NULL, y = ylabs) + 
+    theme_bw() + 
+    theme(
+      panel.grid = element_blank(),
+      text = element_text(size = textsize), 
+      strip.text = element_text(size = textsize),
+      strip.background = element_rect(fill = NA,color = NA),
+      legend.text = element_text(size = textsize),
+      aspect.ratio = facet_ratio,
+      panel.spacing = unit(panel_spacing, "lines"),
+      legend.title = element_text(size = textsize),
+      axis.text = element_text(color = "black", size = textsize),
+      axis.title = element_text(size = textsize),
+      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = textsize),
+      axis.text.y = element_text(margin = margin(r = 10)),
+      axis.line = element_line(color = "black", linewidth = lwidth),
+      axis.ticks = element_line(color = "black",linewidth = lwidth),
+      panel.border = element_rect(color = "black", size = lwidth)
+    ) +
+    ggtitle(title) + 
+    geom_boxplot(aes_string(fill = fill_by), color = "black", position = position_dodge(), size = lwidth, alpha = 0.8, outlier.color = NA) +
+    geom_quasirandom(aes_string(shape = shape_by, group = fill_by), fill = "grey84", dodge.width = 0.75, width = 0.08, size = point_size, stroke = 0.5, shape = 21, show.legend = TRUE) + 
+    scale_color_manual(values = my_palette) +
+    scale_fill_manual(values = my_palette) +
+    facet_wrap2(~cluster_id, ncol = n_cols, scales = xaxis, axes = "all")
+  
+  dfout2 <<- df 
+
+  
+  if (log == TRUE) {
+    if (xaxis == "free") {
+      p + scale_y_continuous(trans='log10') + annotation_logticks(base = 10, sides = "l", outside = TRUE, size = lwidth) + coord_cartesian(clip = "off") + scale_size_area(max_size = 15)
+    }
+    else
+    {
+      p + scale_y_continuous(trans='log10', limits = c(miny, maxy), breaks=c(0.01, 0.1, 1, 10, 100), labels=c(0.01, 0.1, 1, 10, 100)) + annotation_logticks(base = 10, sides = "l", outside = TRUE, size = lwidth) + coord_cartesian(clip = "off") + scale_size_area(max_size = 15)
+    }
+  }
+  else {
+    if (xaxis == "free") {
+      p + coord_cartesian(clip = "off") + scale_size_area(max_size = 15)
+    }
+    else {
+      p + scale_y_continuous(limits = c(0, maxy)) + coord_cartesian(clip = "off") + scale_size_area(max_size = 15)
+    }
+  }
+  
+    
+  # Add statistical tests if requested
+  if (show_stats) {
+    stat.test <- df %>%
+      group_by(cluster_id) %>%
+      wilcox_test(Freq ~ AIM_cond) %>%
+      add_y_position(step.increase = step_increase, scales = xaxis)
+    
+    pbCondStats <<- stat.test  # Save the stats globally
+    
+    p <- p + stat_pvalue_manual(stat.test, label = "p.adj.signif", size = stat_size)
+  }
+  
+}
+
+

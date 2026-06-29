@@ -145,13 +145,13 @@ saveFig <- function(p,
   # format:  output file format
   # svg_mode: for format='svg', choose plain (fast) or grouped_auto (panel groups)
 
+  library(rmdhelp)
   format   <- match.arg(format)
   svg_mode <- match.arg(svg_mode)
 
   # ── Output folder ────────────────────────────────────────────────────────────
-  # Source qmd/Rmd name without a hard rmdhelp dependency (rmdhelp is optional).
-  rmd_file_path      <- .wl_source_file()
-  rmd_file_name      <- if (is.na(rmd_file_path)) "figures" else basename(rmd_file_path)
+  rmd_file_path      <- get_this_rmd_file()
+  rmd_file_name      <- basename(rmd_file_path)
   rmd_file_name_noext <- tools::file_path_sans_ext(rmd_file_name)
 
   folder_base <- if (is.null(output_root))
@@ -200,9 +200,7 @@ saveFig <- function(p,
   }
 
   # ── Excel (plot data) ────────────────────────────────────────────────────────
-  if (saveExcel && !requireNamespace("openxlsx", quietly = TRUE)) {
-    warning("openxlsx is not installed; skipping Excel data save. install.packages('openxlsx').")
-  } else if (saveExcel) {
+  if (saveExcel) {
     library(openxlsx)
 
     # Extract the underlying data regardless of plot type:
@@ -243,10 +241,9 @@ saveFig <- function(p,
                      difftime(Sys.time(), latest_mtime, units = "mins") > 20
 
   if (needs_rmd_copy) {
-    if (!is.na(rmd_file_path) && file.exists(rmd_file_path))
-      file.copy(from = rmd_file_path,
-                to   = file.path(folder_name,
-                                 paste0(timestamp, "_", rmd_file_name)))
+    file.copy(from = rmd_file_path,
+              to   = file.path(folder_name,
+                               paste0(timestamp, "_", rmd_file_name)))
 
     writeLines(capture.output(sessionInfo()),
                con = file.path(folder_name,

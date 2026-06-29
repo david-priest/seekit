@@ -5,10 +5,10 @@
 # included here as a sourced script so the analysis .Rmd is self-contained.
 
 fl2 <- function(p_list, w = 20, h = 20, title = "your_title", saveRData = FALSE, saveExcel = FALSE) {
-  # Name of the source qmd/Rmd, resolved without a hard rmdhelp dependency
-  # (rmdhelp is GitHub-only and optional). Falls back to "figures" if unknown.
-  rmd_file_path <- .wl_source_file()
-  rmd_file_name <- if (is.na(rmd_file_path)) "figures" else basename(rmd_file_path)
+  # Get the name of the current RMD file
+  library(rmdhelp)
+  rmd_file_path <- get_this_rmd_file()
+  rmd_file_name <- basename(rmd_file_path)
   rmd_file_name_noext <- tools::file_path_sans_ext(rmd_file_name)
 
   # Anchor folder to here::here() (project root) rather than getwd().
@@ -46,9 +46,7 @@ fl2 <- function(p_list, w = 20, h = 20, title = "your_title", saveRData = FALSE,
   }
 
   # Save Excel
-  if (saveExcel && !requireNamespace("openxlsx", quietly = TRUE)) {
-    warning("openxlsx is not installed; skipping Excel data save. install.packages('openxlsx').")
-  } else if (saveExcel) {
+  if (saveExcel) {
     library(openxlsx)
     excel_filename <- paste0(folder_name, "/", timestamp, "_", title, "_data.xlsx")
     cat("Saving Excel...\n")
@@ -77,10 +75,8 @@ fl2 <- function(p_list, w = 20, h = 20, title = "your_title", saveRData = FALSE,
 
   # If no RMD or sessionInfo file saved in the last 5 minutes, save a copy
   if (is.na(latest_file_time) || difftime(current_time, latest_file_time, units = "mins") > 20) {
-    if (!is.na(rmd_file_path) && file.exists(rmd_file_path)) {
-      rmd_filename <- paste0(folder_name, "/", timestamp, "_", rmd_file_name)
-      file.copy(from = rmd_file_path, to = rmd_filename)
-    }
+    rmd_filename <- paste0(folder_name, "/", timestamp, "_", rmd_file_name)
+    file.copy(from = rmd_file_path, to = rmd_filename)
 
     # Save the output of sessionInfo() as a text file
     sessioninfo_filename <- paste0(folder_name, "/", timestamp, "_sessioninfo.txt")
